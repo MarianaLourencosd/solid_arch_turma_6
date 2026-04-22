@@ -1,6 +1,6 @@
-const createUserToken = require('../helpers/create-user-token')
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
+const createUserToken = require('../helpers/create-user-token')
 
 module.exports = class UserController {
     static async register(req, res) {
@@ -12,17 +12,23 @@ module.exports = class UserController {
             return
         }
         if (!email) {
-            res.status(422).json({ message: 'email é obrigatorio' })
+            res.status(422).json({ message: 'Email é obrigatorio' })
             return
         }
         if (!phone) {
-            res.status(422).json({ message: 'telefone é obrigatorio' })
+            res.status(422).json({ message: 'Telefone é obrigatorio' })
             return
         }
         if (!password) {
-            res.status(422).json({ message: 'Confirmação de senha é obrigatorio' })
+            res.status(422).json({ message: 'Senha é obrigatoria' })
             return
         }
+
+        if (!confirmpassword) {
+            res.status(422).json({ message: 'Confirmar a senha é obrigatorio' })
+            return
+        }
+
         if (password !== confirmpassword) {
             res.status(422).json({ message: 'As senhas não coincidem' })
             return
@@ -45,7 +51,7 @@ module.exports = class UserController {
         })
         try {
             const newUser = await user.save()
-            await createUserToken(newUser, req,res)
+            await createUserToken(newUser, req, res)
         } catch (error) {
             res.status(503).json({ message: error })
         }

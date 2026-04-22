@@ -4,7 +4,7 @@ const createUserToken = async (user, req, res) => {
     const token = jwt.sign({
         name: user.name,
         id: user._id
-    }, 'fatec-turma5-a2026')
+    }, 'fatec-turma6-a2026')
 
     res.status(201).json({
         message: 'Você está autenticado',
