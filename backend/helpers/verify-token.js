@@ -1,21 +1,31 @@
 const jwt = require('jsonwebtoken')
-const { checkUser } = require('../controllers/UserController')
+const getToken = require('./get-tokens')
 
 const checkToken = (req, res, next) => {
-    if (!req.headers.authorization) {
+
+    if(!req.headers.authorization){
         return res.status(401).json({
-            message: 'Acesso Negado'
+            message: "Erro de Headers"
         })
     }
 
     const token = getToken(req)
 
-try{
-    const verify = jwt.verify(token,'fatec-turma6-a2026')
-    req.user = verified
-    next()
-}catch{
-}
+    if(!token){
+        return res.status(401).json({
+            message: "Acesso Negado"
+        })
+    }
+
+    try{
+        const verified = jwt.verify(token, 'fatec-turma6-a2026')
+        req.user = verified
+        next()
+    }catch (err) {
+        return res.status(400).json({
+            message :'Token Invalido'
+        })
+    }
 }
 
 module.exports = checkToken

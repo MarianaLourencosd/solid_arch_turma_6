@@ -73,14 +73,14 @@ module.exports = class UserController {
 
         const userExists = await User.findOne({ email: email })
 
-        if (userExists) {
+        if (!userExists) {
             res.status(401).json({
                 message: 'Não autorizado, sem registro'
             })
             return
         }
 
-        const checkPassword = await bcrypt.compare(password, userExists, password)
+        const checkPassword = await bcrypt.compare(password, userExists.password)
 
         if (!checkPassword) {
             res.status(401).json({
@@ -99,9 +99,10 @@ module.exports = class UserController {
 
         if (req.headers.authorization) {
             const token = getToken(req)
-            const decodeToken = jwt.verify(token, 'fatec-turma6-a2026')
+            const decoded = jwt.verify(token, 'fatec-turma6-a2026')
 
-            currentUser = await User.findById(decodeToken.id)
+            currentUser = await User.findById(decoded.id)
+
             currentUser.password = undefined
 
 
@@ -112,23 +113,22 @@ module.exports = class UserController {
     }
 
     static async getUserById(req, res) {
-        const id = req.parms.id
+        const id = req.params.id
 
         const user = await User.findById(id)
 
-        if (!user)
+        if (!user) {
             res.status(404).json({
-                message: 'Usuario não encontrado'
+                message: 'Usuario nao encontrado'
             })
-        return
-    
-    res.status(200).json(user)
+            return
         }
+        res.status(200).json(user)
     }
 
-    static async editUser(req,res){
-    res.status(200).json{
-    message: 'Usuario '
-    })
-}
+    static async editUser(req, res) {
+        res.status(200).json({
+            message: 'Usuario atualizado com sucesso'
+        })
+    }
 }
