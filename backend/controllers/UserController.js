@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const bcrypt = require('bcrypt')
 const createUserToken = require('../helpers/create-user-token')
+const getTokens = require('../helpers/get-tokens')
 
 module.exports = class UserController {
     static async register(req, res) {
@@ -89,5 +90,23 @@ module.exports = class UserController {
 
         await createUserToken(userExists, req, res)
     }
-}
 
+    static async checkUser(req,res){
+        let currentUser
+
+        console.log(req.headers.authorization)
+        
+        if(req.headers.authorization){
+            const token = getToken(req)
+            const decodeToken = jwt.verify(token, 'fatec-turma6-a2026')
+
+            currentUser = await User.findById(decodeToken.id)
+            currentUser.password = undefined
+            
+
+        }else{
+            currentUser = null
+        }
+        res.status(200).send(currentUser)
+    }
+}
