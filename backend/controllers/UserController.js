@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const createUserToken = require('../helpers/create-user-token')
 const getToken = require('../helpers/get-tokens')
-const getUserByToken = require('../helpers/create-user-token')
+const getUserByToken = require('../helpers/get-user-by-token')
 
 module.exports = class UserController {
     static async register(req, res) {
@@ -52,6 +52,7 @@ module.exports = class UserController {
             phone,
             password: passwordHash,
         })
+
         try {
             const newUser = await user.save()
             await createUserToken(newUser, req, res)
@@ -106,7 +107,6 @@ module.exports = class UserController {
 
             currentUser.password = undefined
 
-
         } else {
             currentUser = null
         }
@@ -132,8 +132,10 @@ module.exports = class UserController {
 
         const token = getToken(req)
         const user = await getUserByToken(token)
+
         const { name, email, phone, password, confirmpassword } = req.body
         let image = ''
+
         if (!name) {
             res.status(422).json({ message: 'Nome é obrigatorio' })
             return
@@ -160,21 +162,16 @@ module.exports = class UserController {
             res.status(422).json({ message: 'As senhas não coincidem' })
             return
         }
+
+
         const userExists = await User.findOne({ email: email })
 
-        if (userExists) {
-            res.status(422).json({ message: 'O usuario ja existe em nossos registros.' })
+        if (userExists.email === email && userExists) {
+            res.status(422).json({ message: 'Existe um problema de chave e-email com a edição.' })
             return
         }
 
         const salt = await bcrypt.genSalt(12)
         const passwordHash = await bcrypt.hash(password, salt)
-        
-        if (!user) {
-            res.status(422).json({
-                message: 'Usuario não disponivel pra edição'
-            })
-            return
-        }
     }
 }
