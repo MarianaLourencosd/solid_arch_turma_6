@@ -140,6 +140,9 @@ module.exports = class UserController {
             res.status(422).json({ message: 'Nome é obrigatorio' })
             return
         }
+
+        user.name = name 
+
         if (!email) {
             res.status(422).json({ message: 'Email é obrigatorio' })
             return
@@ -148,30 +151,43 @@ module.exports = class UserController {
             res.status(422).json({ message: 'Telefone é obrigatorio' })
             return
         }
-        if (!password) {
-            res.status(422).json({ message: 'Senha é obrigatoria' })
-            return
-        }
 
-        if (!confirmpassword) {
-            res.status(422).json({ message: 'Confirmar a senha é obrigatorio' })
-            return
-        }
-
-        if (password !== confirmpassword) {
-            res.status(422).json({ message: 'As senhas não coincidem' })
-            return
-        }
-
+        user.phone = phone
 
         const userExists = await User.findOne({ email: email })
 
-        if (userExists.email === email && userExists) {
+        if (user.email !== email && userExists) {
+    
             res.status(422).json({ message: 'Existe um problema de chave e-email com a edição.' })
             return
         }
 
-        const salt = await bcrypt.genSalt(12)
-        const passwordHash = await bcrypt.hash(password, salt)
+        user.email = email
+
+        if(password !== confirmpassword){
+            res.status(422).json({message: 'as senhas não coincidem'})
+            return
+            } else if(password === confirmpassword && password != null){
+                const salt = await bcrypt.genSalt(12)
+                user.password = await bcrypt.hash(password, salt)
+
+                user.password = passwordHash
+            }
+
+            try{
+                const updateUser = await User.findOneAndUpdate(
+                    {_id: user._id},
+                    {$set: user},
+                    {new: true}
+                )
+                res.status(202).json({
+                message: 'Dados aceitos e processados',
+                user: upadateUser
+                })
+
+            }catch(err){
+                res.status(500).json({message: err})
+            }
+
     }
 }
